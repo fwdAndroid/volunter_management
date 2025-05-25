@@ -162,6 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         dateTime: post['date'],
                                         eventTime: post['eventTime'],
                                         eventDate: post['date'],
+                                        organizationName: post['userName'],
+                                        organizationUid: post['uid'],
                                       ),
                                     ),
                                   );
