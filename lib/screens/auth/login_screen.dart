@@ -226,10 +226,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? CircularProgressIndicator(color: Colors.white)
                   : Text("Login"),
             ),
-
-            SizedBox(height: 20),
-            TextButton(onPressed: () {}, child: Text("Login As Organizer")),
-
             const Spacer(),
             GestureDetector(
               onTap: () {
