@@ -29,7 +29,7 @@ class _SignupScreenState extends State<SignupScreen> {
           key: _formKey,
           child: Column(
             children: [
-              Image.asset("assets/logo.png"),
+              Image.asset("assets/logo.png", height: 300),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
@@ -158,11 +158,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   hint: const Text('Select Role'),
                   icon: const Icon(Icons.arrow_drop_down),
                   elevation: 16,
-                  style: const TextStyle(color: Colors.deepPurple),
-                  underline: Container(
-                    height: 2,
-                    color: Colors.deepPurpleAccent,
-                  ),
+                  isExpanded: true,
+                  style: TextStyle(color: mainColor),
+                  underline: Container(height: 2, color: mainColor),
                   onChanged: (String? newValue) {
                     setState(() {
                       _selectedRole = newValue!;
