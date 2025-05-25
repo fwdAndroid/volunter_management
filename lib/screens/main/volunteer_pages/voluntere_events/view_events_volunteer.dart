@@ -4,8 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:readmore/readmore.dart';
 import 'package:volunter_management/widgets/noimage_widget.dart';
+import 'package:volunter_management/widgets/save_button.dart';
 
-class ViewEvents extends StatefulWidget {
+class ViewEventsVolunteer extends StatefulWidget {
   final String? description,
       image,
       titleName,
@@ -14,7 +15,7 @@ class ViewEvents extends StatefulWidget {
       eventTime; // Make nullable
   final dateTime;
 
-  ViewEvents({
+  const ViewEventsVolunteer({
     super.key,
     required this.description,
     required this.image,
@@ -26,10 +27,10 @@ class ViewEvents extends StatefulWidget {
   });
 
   @override
-  State<ViewEvents> createState() => _ViewEventsState();
+  State<ViewEventsVolunteer> createState() => _ViewEventsVolunteerState();
 }
 
-class _ViewEventsState extends State<ViewEvents> {
+class _ViewEventsVolunteerState extends State<ViewEventsVolunteer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,6 +117,13 @@ class _ViewEventsState extends State<ViewEvents> {
                 fontWeight: FontWeight.w500,
                 color: Colors.grey[700],
               ),
+            ),
+          ),
+          Spacer(),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SaveButton(title: "Join Request", onTap: () {}),
             ),
           ),
         ],
