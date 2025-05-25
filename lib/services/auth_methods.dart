@@ -1,11 +1,25 @@
-import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:volunter_management/models/user_models.dart';
-import 'package:volunter_management/screens/main/main_dashboard.dart';
+import 'package:volunter_management/wrapper/enum.dart';
+import 'package:volunter_management/wrapper/wrapper_class.dart';
 
 class AuthMethods {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  //User Type
+  Future<UserType> getUserType(String uid) async {
+    DocumentSnapshot doc = await _firestore.collection('users').doc(uid).get();
+    return UserType.values.firstWhere(
+      (e) => e.toString().split('.').last == doc['type'],
+      orElse: () => UserType.volunteer,
+    );
+  }
+
   Future<String> signUpUser({
     required BuildContext context, // Add BuildContext
     required String fullName,
@@ -47,7 +61,7 @@ class AuthMethods {
           res = 'success';
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (builder) => MainDashboard()),
+            MaterialPageRoute(builder: (builder) => Wrapper()),
           );
         }
       }
