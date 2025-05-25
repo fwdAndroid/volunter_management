@@ -1,15 +1,11 @@
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:volunter_management/screens/auth/forgot_password.dart';
 import 'package:volunter_management/screens/auth/signup_screen.dart';
-import 'package:volunter_management/screens/main/main_dashboard.dart';
 import 'package:volunter_management/services/auth_methods.dart';
 import 'package:volunter_management/uitls/colors.dart';
-import 'package:volunter_management/uitls/show_message_bar.dart';
-import 'package:volunter_management/wrapper/enum.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -173,63 +169,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             ),
-            isLoading
-                ? Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: () async {
-                      if (emailController.text.isEmpty ||
-                          passController.text.isEmpty) {
-                        showMessageBar("Email & Password is Required", context);
-                      } else {
-                        setState(() => isLoading = true);
-
-                        try {
-                          String result = await AuthMethods().loginUpUser(
-                            email: emailController.text.trim(),
-                            pass: passController.text.trim(),
-                          );
-
-                          if (result == 'success') {
-                            // Get current user
-                            User? user = FirebaseAuth.instance.currentUser;
-
-                            if (user != null) {
-                              // Fetch user type from Firestore
-                              UserType userType = await AuthMethods()
-                                  .getUserType(user.uid);
-
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (builder) =>
-                                      MainDashboard(userType: userType),
-                                ),
-                              );
-                            }
-                          } else {
-                            showMessageBar(result, context);
-                          }
-                        } catch (e) {
-                          showMessageBar(
-                            "Error fetching user data: ${e.toString()}",
-                            context,
-                          );
-                        } finally {
-                          setState(() => isLoading = false);
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      backgroundColor: mainColor,
-                      fixedSize: const Size(320, 60),
-                    ),
-                    child: isLoading
-                        ? CircularProgressIndicator(color: colorWhite)
-                        : Text("Login", style: TextStyle(color: colorWhite)),
-                  ),
+            ElevatedButton(
+              child: Text("Login"),
+              onPressed: () async {
+                String result = await AuthMethods().loginUpUser(
+                  email: emailController.text.trim(),
+                  pass: passController.text.trim(),
+                );
+              },
+            ),
             SizedBox(height: 20),
 
             const Spacer(),

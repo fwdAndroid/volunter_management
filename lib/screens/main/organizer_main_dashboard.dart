@@ -1,27 +1,27 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:volunter_management/screens/main/pages/account_screen.dart';
-import 'package:volunter_management/screens/main/pages/chat_screen.dart';
-import 'package:volunter_management/screens/main/pages/home_screen.dart';
-import 'package:volunter_management/screens/main/pages/search_screen.dart';
+import 'package:volunter_management/screens/main/organizer_pages/organizer_account_screen.dart';
+import 'package:volunter_management/screens/main/organizer_pages/organizer_chat_screen.dart';
+import 'package:volunter_management/screens/main/organizer_pages/organizer_home_screen.dart';
+import 'package:volunter_management/screens/main/organizer_pages/organizer_search_screen.dart';
 import 'package:volunter_management/uitls/colors.dart';
 
-class MainDashboard extends StatefulWidget {
-  const MainDashboard({super.key});
+class OrganizerMainDashboard extends StatefulWidget {
+  const OrganizerMainDashboard({super.key});
 
   @override
-  State<MainDashboard> createState() => _MainDashboardState();
+  State<OrganizerMainDashboard> createState() => _OrganizerMainDashboardState();
 }
 
-class _MainDashboardState extends State<MainDashboard> {
+class _OrganizerMainDashboardState extends State<OrganizerMainDashboard> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    HomeScreen(), // Replace with your screen widgets
-    SearchScreen(),
-    ChatScreen(),
-    AccountScreen(),
+    OrganizerHomeScreen(), // Replace with your screen widgets
+    OrganizerSearchScreen(),
+    OrganizerChatScreen(),
+    OrganizerAcountScreen(),
   ];
   @override
   Widget build(BuildContext context) {
@@ -63,7 +63,7 @@ class _MainDashboardState extends State<MainDashboard> {
             ),
             BottomNavigationBarItem(
               label: "Account",
-              icon: _currentIndex == 2
+              icon: _currentIndex == 3
                   ? Icon(Icons.person, size: 25, color: mainColor)
                   : Icon(Icons.person),
             ),

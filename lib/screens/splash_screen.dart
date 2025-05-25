@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:volunter_management/screens/auth/login_screen.dart';
 import 'package:volunter_management/uitls/colors.dart';
-import 'package:volunter_management/wrapper/wrapper_class.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => Wrapper()),
+      MaterialPageRoute(builder: (context) => LoginScreen()),
     );
     // User? user = FirebaseAuth.instance.currentUser;
 

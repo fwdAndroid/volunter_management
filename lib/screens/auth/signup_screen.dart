@@ -16,7 +16,7 @@ class _SignupScreenState extends State<SignupScreen> {
   TextEditingController passController = TextEditingController();
   TextEditingController userNameController = TextEditingController();
   String? _selectedRole;
-  final List<String> _roles = ['Volunteer', 'Organizer', 'Validator'];
+  final List<String> _roles = ['Volunteer', 'Organizer'];
   bool _isPasswordVisible = false;
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
@@ -29,7 +29,7 @@ class _SignupScreenState extends State<SignupScreen> {
           key: _formKey,
           child: Column(
             children: [
-              Image.asset("assets/logo.png", height: 300),
+              Image.asset("assets/logo.png", height: 200),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
@@ -158,6 +158,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   hint: const Text('Select Role'),
                   icon: const Icon(Icons.arrow_drop_down),
                   elevation: 16,
+                  isDense: true,
                   isExpanded: true,
                   style: TextStyle(color: mainColor),
                   underline: Container(height: 2, color: mainColor),

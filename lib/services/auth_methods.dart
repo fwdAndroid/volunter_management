@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:volunter_management/models/user_models.dart';
-import 'package:volunter_management/wrapper/enum.dart';
-import 'package:volunter_management/wrapper/wrapper_class.dart';
+import 'package:volunter_management/screens/main/main_dashboard.dart';
+import 'package:volunter_management/screens/main/organizer_main_dashboard.dart';
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -11,66 +11,63 @@ class AuthMethods {
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  //User Type
-  Future<UserType> getUserType(String uid) async {
-    DocumentSnapshot doc = await _firestore.collection('users').doc(uid).get();
-    return UserType.values.firstWhere(
-      (e) => e.toString().split('.').last == doc['type'],
-      orElse: () => UserType.volunteer,
-    );
-  }
-
-  Future<String> signUpUser({
-    required BuildContext context, // Add BuildContext
+  Future<void> signUpUser({
+    required BuildContext context,
     required String fullName,
     required String email,
     required String password,
     required String type,
   }) async {
-    String res = 'An error occurred';
     try {
-      // Check if email is already registered
       List<String> methods = await FirebaseAuth.instance
           .fetchSignInMethodsForEmail(email);
       if (methods.isNotEmpty) {
-        // Show error message in Scaffold
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Email is already registered')),
         );
-        return 'Email is already registered';
-      } else {
-        if (email.isNotEmpty && password.isNotEmpty && fullName.isNotEmpty) {
-          UserCredential cred = await FirebaseAuth.instance
-              .createUserWithEmailAndPassword(email: email, password: password);
+        return null;
+      }
 
-          // Add User to the database with model
+      if (email.isNotEmpty && password.isNotEmpty && fullName.isNotEmpty) {
+        UserCredential cred = await _auth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
 
-          UserModel userModel = UserModel(
-            uuid: cred.user!.uid,
-            type: type,
-            fullName: fullName,
-            email: email,
-            password: password,
-          );
+        UserModel userModel = UserModel(
+          uuid: cred.user!.uid,
+          type: type,
+          fullName: fullName,
+          email: email,
+          password: password,
+        );
 
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(cred.user!.uid)
-              .set(userModel.toJson());
-
-          res = 'success';
-          Navigator.push(
+        await _firestore
+            .collection('users')
+            .doc(cred.user!.uid)
+            .set(userModel.toJson());
+        // Optional: Show success and navigate
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Registration successful")));
+        if (type == "Organizer") {
+          Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (builder) => Wrapper()),
+            MaterialPageRoute(builder: (builder) => OrganizerMainDashboard()),
+          );
+        } else if (type == "Volunteer") {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (builder) => MainDashboard()),
           );
         }
       }
     } catch (e) {
-      res = e.toString();
-      // Optionally display the error message
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
-    return res;
+    return null;
   }
 
   Future<String> loginUpUser({
