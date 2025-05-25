@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:volunter_management/screens/main/organizer_pages/add/add_event.dart';
+import 'package:volunter_management/screens/main/organizer_pages/events/add_event.dart';
 import 'package:volunter_management/uitls/colors.dart';
 
 class OrganizerHomeScreen extends StatefulWidget {
