@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:volunter_management/screens/auth/forgot_password.dart';
 import 'package:volunter_management/screens/auth/signup_screen.dart';
 import 'package:volunter_management/screens/main/main_dashboard.dart';
+import 'package:volunter_management/services/auth_methods.dart';
 import 'package:volunter_management/uitls/colors.dart';
 import 'package:volunter_management/uitls/show_message_bar.dart';
 
@@ -179,19 +180,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   setState(() {
                     isLoading = true;
                   });
-                  // String result = await AuthMethods().loginUpUser(
-                  //   email: emailController.text.trim(),
-                  //   pass: passController.text.trim(),
-                  // );
-                  // if (result == 'success') {
-                  //   // SharedPref().saveRememberMe();
-                  //   Navigator.pushReplacement(
-                  //     context,
-                  //     MaterialPageRoute(builder: (builder) => MainDashboard()),
-                  //   );
-                  // } else {
-                  //   showMessageBar(result, context);
-                  // }
+                  String result = await AuthMethods().loginUpUser(
+                    email: emailController.text.trim(),
+                    pass: passController.text.trim(),
+                  );
+                  if (result == 'success') {
+                    // SharedPref().saveRememberMe();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (builder) => MainDashboard()),
+                    );
+                  } else {
+                    showMessageBar(result, context);
+                  }
                   setState(() {
                     isLoading = false;
                   });
