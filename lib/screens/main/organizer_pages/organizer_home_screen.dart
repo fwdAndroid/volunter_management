@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:volunter_management/screens/main/organizer_pages/add/add_event.dart';
+import 'package:volunter_management/uitls/colors.dart';
 
 class OrganizerHomeScreen extends StatefulWidget {
   const OrganizerHomeScreen({super.key});
@@ -10,6 +12,17 @@ class OrganizerHomeScreen extends StatefulWidget {
 class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: mainColor,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (builder) => AddEvent()),
+          );
+        },
+        child: Icon(Icons.add, color: colorWhite),
+      ),
+    );
   }
 }

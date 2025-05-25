@@ -183,13 +183,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 setState(() {
                   isLoading = true;
                 });
+
                 String result = await AuthMethods().loginUpUser(
                   email: emailController.text.trim(),
                   pass: passController.text.trim(),
                 );
+
                 if (result == "success") {
-                  // Fetch user type after successful login
+                  // Get user type
                   String? userType = await AuthMethods().getUserType();
+
                   if (userType == 'Organizer') {
                     Navigator.pushReplacement(
                       context,
@@ -197,10 +200,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         builder: (context) => OrganizerMainDashboard(),
                       ),
                     );
-                  } else {
+                  } else if (userType == 'Volunteer') {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) => MainDashboard()),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Unknown user type: $userType")),
                     );
                   }
                 } else {
@@ -209,10 +216,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     context,
                   ).showSnackBar(SnackBar(content: Text(result)));
                 }
+
                 setState(() {
                   isLoading = false;
                 });
               },
+
               child: isLoading
                   ? CircularProgressIndicator(color: Colors.white)
                   : Text("Login"),

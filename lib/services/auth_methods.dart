@@ -50,17 +50,6 @@ class AuthMethods {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Registration successful")));
-        if (type == "Organizer") {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (builder) => OrganizerMainDashboard()),
-          );
-        } else if (type == "Volunteer") {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (builder) => MainDashboard()),
-          );
-        }
       }
     } catch (e) {
       ScaffoldMessenger.of(
@@ -98,18 +87,14 @@ class AuthMethods {
   }
 
   Future<String?> getUserType() async {
-    try {
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        DocumentSnapshot userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-        return userDoc.get('type') as String?;
-      }
-      return null;
-    } catch (e) {
-      return null;
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentSnapshot snap = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      return snap['type'];
     }
+    return null;
   }
 }

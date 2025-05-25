@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:volunter_management/screens/auth/organizer_signup.dart';
-import 'package:volunter_management/screens/main/main_dashboard.dart';
+import 'package:volunter_management/screens/auth/login_screen.dart';
+import 'package:volunter_management/screens/auth/signup_screen.dart';
+import 'package:volunter_management/screens/main/organizer_main_dashboard.dart';
 import 'package:volunter_management/services/auth_methods.dart';
 import 'package:volunter_management/uitls/colors.dart';
 import 'package:volunter_management/uitls/show_message_bar.dart';
 
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+class OrganizerSignup extends StatefulWidget {
+  const OrganizerSignup({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<OrganizerSignup> createState() => _OrganizerSignupState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _OrganizerSignupState extends State<OrganizerSignup> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passController = TextEditingController();
   TextEditingController userNameController = TextEditingController();
@@ -25,7 +26,7 @@ class _SignupScreenState extends State<SignupScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Volunteer Registration",
+          "Organizor Registration",
           style: TextStyle(color: colorWhite),
         ),
         centerTitle: true,
@@ -44,7 +45,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: TextFormField(
                   controller: userNameController,
                   decoration: InputDecoration(
-                    hintText: 'Fawad Kaleem',
+                    hintText: 'User Name',
                     hintStyle: GoogleFonts.poppins(
                       color: textColor,
                       fontSize: 14,
@@ -80,7 +81,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: TextFormField(
                   controller: emailController,
                   decoration: InputDecoration(
-                    hintText: 'fwdkaleem@gmail.com',
+                    hintText: 'Email',
                     hintStyle: GoogleFonts.poppins(
                       color: textColor,
                       fontSize: 14,
@@ -185,13 +186,13 @@ class _SignupScreenState extends State<SignupScreen> {
 
                               password: passController.text.trim(),
 
-                              type: "Volunteer",
+                              type: "Organizer",
                             );
                           }
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (builder) => MainDashboard(),
+                              builder: (builder) => OrganizerMainDashboard(),
                             ),
                           );
                           setState(() {
@@ -211,15 +212,25 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: TextStyle(color: colorWhite),
                       ),
                     ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (builder) => SignupScreen()),
+                  );
+                },
+                child: Text("Register As Volunteer"),
+              ),
+              const SizedBox(height: 20),
 
               TextButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (builder) => OrganizerSignup()),
+                    MaterialPageRoute(builder: (builder) => LoginScreen()),
                   );
                 },
-                child: Text("Register As Organizer"),
+                child: Text("Already Have an Account, Login In"),
               ),
             ],
           ),
