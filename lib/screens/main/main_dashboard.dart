@@ -50,9 +50,9 @@ class _MainDashboardState extends State<MainDashboard> {
             ),
             BottomNavigationBarItem(
               icon: _currentIndex == 1
-                  ? Icon(Icons.search, size: 25, color: mainColor)
-                  : Icon(Icons.search, color: secondaryColor, size: 25),
-              label: 'Search',
+                  ? Icon(Icons.event_seat, size: 25, color: mainColor)
+                  : Icon(Icons.event_seat, color: secondaryColor, size: 25),
+              label: 'Events',
             ),
 
             BottomNavigationBarItem(
