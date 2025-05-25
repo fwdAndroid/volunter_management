@@ -228,6 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
 
             SizedBox(height: 20),
+            TextButton(onPressed: () {}, child: Text("Login As Organizer")),
 
             const Spacer(),
             GestureDetector(

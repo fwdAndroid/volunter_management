@@ -210,18 +210,18 @@ class _AddEventState extends State<AddEvent> {
                             'uuid': uuid,
                             'uid': FirebaseAuth.instance.currentUser!.uid,
                             'volunteer': [],
-
+                            'eventTime': timeController.text,
+                            "eventDate": dateController.text,
                             // Add user metadata
                             'userName': userData['fullName'] ?? '',
                             'userEmail': userData['email'] ?? '',
-                            'userImage': userData['image'] ?? '',
                           });
 
                       setState(() {
                         isLoading = false;
                       });
 
-                      showMessageBar("Feed Posted in Communities", context);
+                      showMessageBar("Event Created Successfully", context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
