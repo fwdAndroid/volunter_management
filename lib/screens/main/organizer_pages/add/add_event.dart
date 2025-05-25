@@ -199,7 +199,7 @@ class _AddEventState extends State<AddEvent> {
                       }
 
                       await FirebaseFirestore.instance
-                          .collection('communitiesPost')
+                          .collection('events')
                           .doc(uuid)
                           .set({
                             'eventId': uuid,
