@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:volunter_management/screens/main/organizer_pages/events/edit_event.dart';
+import 'package:volunter_management/screens/main/organizer_pages/organizer_setting/organizer_setting.dart';
 import 'package:volunter_management/uitls/colors.dart';
 import 'package:readmore/readmore.dart';
 
@@ -26,10 +27,10 @@ class _OrganizerAcountScreenState extends State<OrganizerAcountScreen> {
               icon: Icon(Icons.settings),
               color: mainColor,
               onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (builder) => SettingPage()),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (builder) => OrganizerSetting()),
+                );
               },
             ),
           ),
@@ -169,7 +170,7 @@ class _OrganizerAcountScreenState extends State<OrganizerAcountScreen> {
                                         ),
                                       ),
                                       Text(
-                                        post['date'].toString() ?? "Untitled",
+                                        post['date'].toString(),
                                         style: GoogleFonts.poppins(
                                           color: black,
                                           fontWeight: FontWeight.w500,
