@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:volunter_management/screens/main/pages/account_screen.dart';
-import 'package:volunter_management/screens/main/pages/chat_screen.dart';
-import 'package:volunter_management/screens/main/pages/home_screen.dart';
-import 'package:volunter_management/screens/main/pages/search_screen.dart';
+import 'package:volunter_management/screens/main/volunteer_pages/pages/account_screen.dart';
+import 'package:volunter_management/screens/main/volunteer_pages/pages/chat_screen.dart';
+import 'package:volunter_management/screens/main/volunteer_pages/pages/home_screen.dart';
+import 'package:volunter_management/screens/main/volunteer_pages/pages/search_screen.dart';
 import 'package:volunter_management/uitls/colors.dart';
 
 class MainDashboard extends StatefulWidget {
@@ -63,7 +63,7 @@ class _MainDashboardState extends State<MainDashboard> {
             ),
             BottomNavigationBarItem(
               label: "Account",
-              icon: _currentIndex == 2
+              icon: _currentIndex == 3
                   ? Icon(Icons.person, size: 25, color: mainColor)
                   : Icon(Icons.person),
             ),

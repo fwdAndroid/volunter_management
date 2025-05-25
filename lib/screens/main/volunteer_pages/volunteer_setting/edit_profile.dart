@@ -1,21 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:volunter_management/screens/main/organizer_main_dashboard.dart';
+import 'package:volunter_management/screens/main/main_dashboard.dart';
 import 'package:volunter_management/uitls/colors.dart';
 import 'package:volunter_management/uitls/show_message_bar.dart';
 import 'package:volunter_management/widgets/save_button.dart';
 
-class OrganizerEditProfile extends StatefulWidget {
-  const OrganizerEditProfile({super.key});
+class EditProfile extends StatefulWidget {
+  const EditProfile({super.key});
 
   @override
-  State<OrganizerEditProfile> createState() => _OrganizerEditProfileState();
+  State<EditProfile> createState() => _EditProfileState();
 }
 
-class _OrganizerEditProfileState extends State<OrganizerEditProfile> {
+class _EditProfileState extends State<EditProfile> {
   TextEditingController nameController = TextEditingController();
   bool _isLoading = false;
 
@@ -99,7 +98,7 @@ class _OrganizerEditProfileState extends State<OrganizerEditProfile> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (builder) => OrganizerMainDashboard(),
+                              builder: (builder) => MainDashboard(),
                             ),
                           );
                         }
