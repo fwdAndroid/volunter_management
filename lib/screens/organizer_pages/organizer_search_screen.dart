@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:volunter_management/screens/main/volunteer_pages/volunteer_events_tab/join_volunteer_events.dart';
-import 'package:volunter_management/screens/main/volunteer_pages/volunteer_events_tab/request_send_volunteer_events.dart';
+import 'package:volunter_management/screens/organizer_pages/organizer_tab/accepted_request.dart';
+import 'package:volunter_management/screens/organizer_pages/organizer_tab/recived_request.dart';
 import 'package:volunter_management/uitls/colors.dart';
 
-class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+class OrganizerSearchScreen extends StatefulWidget {
+  const OrganizerSearchScreen({super.key});
 
   @override
-  State<SearchScreen> createState() => _SearchScreenState();
+  State<OrganizerSearchScreen> createState() => _OrganizerSearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _OrganizerSearchScreenState extends State<OrganizerSearchScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -24,15 +24,13 @@ class _SearchScreenState extends State<SearchScreen> {
             labelColor: colorWhite,
             indicatorColor: colorWhite,
             tabs: [
-              Tab(text: "Request Send"),
-              Tab(text: "Join Event"),
+              Tab(text: "Request Recived"),
+              Tab(text: "Accepted Request"),
             ],
           ),
           title: Text('Events', style: TextStyle(color: colorWhite)),
         ),
-        body: TabBarView(
-          children: [RequestSendVolunteerEvents(), JoinVolunteerEvents()],
-        ),
+        body: TabBarView(children: [RecivedRequest(), AcceptedRequest()]),
       ),
     );
   }

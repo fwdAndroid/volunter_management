@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:volunter_management/screens/main/volunteer_pages/pages/account_screen.dart';
-import 'package:volunter_management/screens/main/volunteer_pages/pages/chat_screen.dart';
-import 'package:volunter_management/screens/main/volunteer_pages/pages/home_screen.dart';
-import 'package:volunter_management/screens/main/volunteer_pages/pages/search_screen.dart';
+import 'package:volunter_management/screens/volunteer_pages/pages/account_screen.dart';
+import 'package:volunter_management/screens/volunteer_pages/pages/chat_screen.dart';
+import 'package:volunter_management/screens/volunteer_pages/pages/home_screen.dart';
+import 'package:volunter_management/screens/volunteer_pages/pages/search_screen.dart';
 import 'package:volunter_management/uitls/colors.dart';
 
 class MainDashboard extends StatefulWidget {

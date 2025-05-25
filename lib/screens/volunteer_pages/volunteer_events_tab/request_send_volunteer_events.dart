@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:readmore/readmore.dart';
-import 'package:volunter_management/screens/main/volunteer_pages/voluntere_events/view_events_volunteer.dart';
+import 'package:volunter_management/screens/volunteer_pages/voluntere_events/view_events_volunteer.dart';
 import 'package:volunter_management/uitls/colors.dart';
 
 class RequestSendVolunteerEvents extends StatefulWidget {

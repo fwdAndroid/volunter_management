@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:volunter_management/screens/main/organizer_pages/organizer_account_screen.dart';
-import 'package:volunter_management/screens/main/organizer_pages/organizer_chat_screen.dart';
-import 'package:volunter_management/screens/main/organizer_pages/organizer_home_screen.dart';
-import 'package:volunter_management/screens/main/organizer_pages/organizer_search_screen.dart';
+import 'package:volunter_management/screens/organizer_pages/organizer_account_screen.dart';
+import 'package:volunter_management/screens/organizer_pages/organizer_chat_screen.dart';
+import 'package:volunter_management/screens/organizer_pages/organizer_home_screen.dart';
+import 'package:volunter_management/screens/organizer_pages/organizer_search_screen.dart';
 import 'package:volunter_management/uitls/colors.dart';
 
 class OrganizerMainDashboard extends StatefulWidget {
@@ -50,9 +50,9 @@ class _OrganizerMainDashboardState extends State<OrganizerMainDashboard> {
             ),
             BottomNavigationBarItem(
               icon: _currentIndex == 1
-                  ? Icon(Icons.search, size: 25, color: mainColor)
-                  : Icon(Icons.search, color: secondaryColor, size: 25),
-              label: 'Search',
+                  ? Icon(Icons.event, size: 25, color: mainColor)
+                  : Icon(Icons.event, color: secondaryColor, size: 25),
+              label: 'Event',
             ),
 
             BottomNavigationBarItem(

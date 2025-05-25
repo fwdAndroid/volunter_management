@@ -1,40 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:readmore/readmore.dart';
-import 'package:volunter_management/screens/main/organizer_pages/events/add_event.dart';
-import 'package:volunter_management/screens/main/organizer_pages/events/view_events.dart';
+import 'package:volunter_management/screens/volunteer_pages/voluntere_events/view_events_volunteer.dart';
 import 'package:volunter_management/uitls/colors.dart';
 
-class OrganizerHomeScreen extends StatefulWidget {
-  const OrganizerHomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<OrganizerHomeScreen> createState() => _OrganizerHomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
+      appBar: AppBar(
+        title: Text("Events", style: TextStyle(color: colorWhite)),
+        automaticallyImplyLeading: false,
         backgroundColor: mainColor,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (builder) => AddEvent()),
-          );
-        },
-        child: Icon(Icons.add, color: colorWhite),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('events')
-                .where("uid", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-                .snapshots(),
+            stream: FirebaseFirestore.instance.collection('events').snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -164,7 +154,7 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (builder) => ViewEvents(
+                                      builder: (builder) => ViewEventsVolunteer(
                                         uuid: post['eventId'],
                                         description: post['description'],
                                         titleName: post['eventName'],
@@ -172,6 +162,8 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
                                         dateTime: post['date'],
                                         eventTime: post['eventTime'],
                                         eventDate: post['date'],
+                                        organizationName: post['userName'],
+                                        organizationUid: post['uid'],
                                       ),
                                     ),
                                   );
@@ -179,76 +171,6 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
                                 child: Text(
                                   "View Event",
                                   style: TextStyle(color: black),
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text("Confirm Deletion"),
-                                        content: Text(
-                                          "Are you sure you want to delete this post?",
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(
-                                                context,
-                                              ); // Close the dialog
-                                            },
-                                            child: Text("Cancel"),
-                                          ),
-                                          TextButton(
-                                            onPressed: () async {
-                                              try {
-                                                await FirebaseFirestore.instance
-                                                    .collection('events')
-                                                    .doc(
-                                                      post['eventId'],
-                                                    ) // Ensure you have a unique ID for each post
-                                                    .delete();
-
-                                                Navigator.pop(
-                                                  context,
-                                                ); // Close the dialog
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      "Post deleted successfully",
-                                                    ),
-                                                  ),
-                                                );
-                                              } catch (e) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      "Failed to delete post: $e",
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            },
-                                            child: Text(
-                                              "Delete",
-                                              style: TextStyle(
-                                                color: Colors.red,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                                child: Text(
-                                  "Delete",
-                                  style: TextStyle(color: red),
                                 ),
                               ),
                             ],
