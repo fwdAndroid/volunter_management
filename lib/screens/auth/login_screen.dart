@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:volunter_management/screens/auth/forgot_password.dart';
 import 'package:volunter_management/screens/auth/signup_screen.dart';
+import 'package:volunter_management/screens/main/main_dashboard.dart';
+import 'package:volunter_management/screens/main/organizer_main_dashboard.dart';
 import 'package:volunter_management/services/auth_methods.dart';
 import 'package:volunter_management/uitls/colors.dart';
 
@@ -170,14 +172,52 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             ElevatedButton(
-              child: Text("Login"),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30), // <-- Radius
+                ),
+                backgroundColor: mainColor,
+                fixedSize: const Size(320, 60),
+              ),
               onPressed: () async {
+                setState(() {
+                  isLoading = true;
+                });
                 String result = await AuthMethods().loginUpUser(
                   email: emailController.text.trim(),
                   pass: passController.text.trim(),
                 );
+                if (result == "success") {
+                  // Fetch user type after successful login
+                  String? userType = await AuthMethods().getUserType();
+                  if (userType == 'Organizer') {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => OrganizerMainDashboard(),
+                      ),
+                    );
+                  } else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => MainDashboard()),
+                    );
+                  }
+                } else {
+                  // Show error message
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(result)));
+                }
+                setState(() {
+                  isLoading = false;
+                });
               },
+              child: isLoading
+                  ? CircularProgressIndicator(color: Colors.white)
+                  : Text("Login"),
             ),
+
             SizedBox(height: 20),
 
             const Spacer(),

@@ -96,4 +96,20 @@ class AuthMethods {
     }
     return res;
   }
+
+  Future<String?> getUserType() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        return userDoc.get('type') as String?;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
 }
