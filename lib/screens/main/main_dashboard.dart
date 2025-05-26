@@ -20,7 +20,7 @@ class _MainDashboardState extends State<MainDashboard> {
   final List<Widget> _screens = [
     HomeScreen(), // Replace with your screen widgets
     SearchScreen(),
-    ChatScreen(),
+    VolunteerChatScreen(),
     AccountScreen(),
   ];
   @override

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ChatScreenModule extends StatefulWidget {
   final String volunteerId;
@@ -106,10 +107,43 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
           maxWidth: MediaQuery.of(context).size.width * 0.7,
         ),
         decoration: BoxDecoration(
-          color: isMe ? Colors.blue[100] : Colors.grey[300],
+          color: isMe ? Colors.white : Colors.green[100],
+          border: isMe
+              ? Border.all(color: Colors.blue, width: 1.5)
+              : Border.all(color: Colors.green[300]!),
           borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 2,
+            ),
+          ],
         ),
-        child: Text(text),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              isMe ? widget.organizerName : widget.volunteerName,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: isMe ? Colors.blue[800] : Colors.green[800],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(text),
+            const SizedBox(height: 4),
+            Text(
+              DateFormat('hh:mm a').format(DateTime.now()),
+              style: TextStyle(
+                fontSize: 10,
+                color: isMe ? Colors.blue[600] : Colors.green[600],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -124,7 +158,7 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
         .add({
           'text': _messageController.text,
           'senderId': widget.organizerId,
-          'timestamp': FieldValue.serverTimestamp(),
+          'timestamp': FieldValue.serverTimestamp(), // Add this line
         });
 
     _messageController.clear();
