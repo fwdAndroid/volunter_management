@@ -41,6 +41,7 @@ dependencies:
   read_more_text: ^0.0.5
   readmore: ^3.0.0
   share_plus: ^11.0.0
+  url_launcher: ^6.1.11
   uuid: ^4.5.1
 
 dev_dependencies:
