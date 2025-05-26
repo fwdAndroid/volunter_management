@@ -6,6 +6,7 @@ class ChatScreenModule extends StatefulWidget {
   final String volunteerName;
   final String eventId;
   final String organizerId;
+  final String organizerName;
 
   const ChatScreenModule({
     super.key,
@@ -13,6 +14,7 @@ class ChatScreenModule extends StatefulWidget {
     required this.volunteerName,
     required this.eventId,
     required this.organizerId,
+    required this.organizerName,
   });
 
   @override
@@ -36,7 +38,7 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(widget.volunteerName),
-            Text(widget.eventId, style: const TextStyle(fontSize: 14)),
+            Text(widget.organizerName, style: const TextStyle(fontSize: 14)),
           ],
         ),
       ),

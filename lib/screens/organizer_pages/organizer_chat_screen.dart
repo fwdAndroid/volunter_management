@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:volunter_management/chat_module/chat_screen_module.dart';
+import 'package:volunter_management/uitls/colors.dart';
 
 class OrganizerChatScreen extends StatefulWidget {
   const OrganizerChatScreen({super.key});
@@ -18,7 +19,13 @@ class _OrganizerChatScreenState extends State<OrganizerChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Chat with Volunteers')),
+      appBar: AppBar(
+        title: const Text(
+          'Chat with Volunteers',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: mainColor,
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore
             .collection('joinevents')
@@ -62,20 +69,22 @@ class _OrganizerChatScreenState extends State<OrganizerChatScreen> {
   }
 
   Widget _buildChatListItem(Map<String, dynamic> request, String requestId) {
-    return ListTile(
-      title: Text(request['volunteerName']),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(request['eventName']),
-          Text(
-            'Accepted on ${_formatDate(request['processedAt'])}',
-            style: TextStyle(color: Colors.grey[600], fontSize: 12),
-          ),
-        ],
+    return Card(
+      child: ListTile(
+        title: Text(request['volunteerName']),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(request['eventName']),
+            Text(
+              'Accepted on ${_formatDate(request['processedAt'])}',
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            ),
+          ],
+        ),
+        trailing: const Icon(Icons.chat),
+        onTap: () => _openChat(context, request),
       ),
-      trailing: const Icon(Icons.chat),
-      onTap: () => _openChat(context, request),
     );
   }
 
@@ -84,6 +93,7 @@ class _OrganizerChatScreenState extends State<OrganizerChatScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => ChatScreenModule(
+          organizerName: request['organizationName'],
           volunteerId: request['volunteerId'],
           volunteerName: request['volunteerName'],
           eventId: request['eventId'],

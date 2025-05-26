@@ -223,8 +223,8 @@ class _LoginScreenState extends State<LoginScreen> {
               },
 
               child: isLoading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text("Login"),
+                  ? CircularProgressIndicator(color: colorWhite)
+                  : Text("Login", style: TextStyle(color: colorWhite)),
             ),
             const Spacer(),
             GestureDetector(

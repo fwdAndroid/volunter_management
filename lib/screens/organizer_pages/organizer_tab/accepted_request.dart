@@ -114,6 +114,7 @@ class _AcceptedRequestState extends State<AcceptedRequest> {
       context,
       MaterialPageRoute(
         builder: (context) => ChatScreenModule(
+          organizerName: request['organizationName'],
           volunteerId: request['volunteerId'],
           volunteerName: request['volunteerName'],
           eventId: request['eventId'],
