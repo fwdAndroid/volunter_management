@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -25,21 +26,39 @@ class ChatScreenModule extends StatefulWidget {
 class _ChatScreenModuleState extends State<ChatScreenModule> {
   final TextEditingController _messageController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Add FirebaseAuth instance
 
   String get _chatId {
+    // Sort by ID to ensure consistency regardless of who initiates the chat or views it
     final ids = [widget.volunteerId, widget.organizerId]..sort();
     return '${ids[0]}_${ids[1]}_${widget.eventId}';
   }
 
   @override
   Widget build(BuildContext context) {
+    // Determine the name of the chat partner for the AppBar title
+    // String chatPartnerName = "";
+    // final currentUser = _auth.currentUser;
+    // if (currentUser != null) {
+    //   if (currentUser.uid == widget.organizerId) {
+    //     chatPartnerName = widget.volunteerName;
+    //   } else if (currentUser.uid == widget.volunteerId) {
+    //     chatPartnerName = widget.organizerName;
+    //   }
+    // }
+
     return Scaffold(
       appBar: AppBar(
+        // title: Text(chatPartnerName.isNotEmpty ? "Chat with $chatPartnerName" : "Chat"), // Alternative title
         title: Column(
+          // Keeping your original title structure
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.volunteerName),
-            Text(widget.organizerName, style: const TextStyle(fontSize: 14)),
+            Text("Org: ${widget.organizerName}"), // Prefixing for clarity
+            Text(
+              "Vol: ${widget.volunteerName}",
+              style: const TextStyle(fontSize: 14),
+            ),
           ],
         ),
       ),
@@ -51,22 +70,31 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
                   .collection('chats')
                   .doc(_chatId)
                   .collection('messages')
-                  .orderBy('timestamp', descending: false)
+                  .orderBy(
+                    'timestamp',
+                    descending: false,
+                  ) // Show oldest messages first
                   .snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text("No messages yet."));
                 }
 
                 return ListView.builder(
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
-                    final message =
-                        snapshot.data!.docs[index].data()
-                            as Map<String, dynamic>;
-                    final isMe = message['senderId'] == widget.organizerId;
+                    final messageDoc = snapshot.data!.docs[index];
+                    final messageData =
+                        messageDoc.data() as Map<String, dynamic>;
 
-                    return _buildMessageBubble(message['text'], isMe);
+                    // Determine if the message was sent by the organizer
+                    final bool isOrganizerMessage =
+                        messageData['senderId'] == widget.organizerId;
+
+                    return _buildMessageBubble(messageData, isOrganizerMessage);
                   },
                 );
               },
@@ -83,6 +111,7 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
                       hintText: 'Type your message...',
                       border: OutlineInputBorder(),
                     ),
+                    onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
                 IconButton(
@@ -97,51 +126,102 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
     );
   }
 
-  Widget _buildMessageBubble(String text, bool isMe) {
+  Widget _buildMessageBubble(
+    Map<String, dynamic> messageData,
+    bool isOrganizerMessage,
+  ) {
+    final String textContent =
+        messageData['text'] as String? ?? ''; // Message text
+    final Timestamp? firestoreTimestamp =
+        messageData['timestamp'] as Timestamp?; // Firestore timestamp
+
+    // Organizer messages on the LEFT, Volunteer messages on the RIGHT
+    final Alignment bubbleAlignment = isOrganizerMessage
+        ? Alignment.centerLeft
+        : Alignment.centerRight;
+
+    // Determine display name based on who sent the message
+    final String displayName = isOrganizerMessage
+        ? widget.organizerName
+        : widget.volunteerName;
+
+    // Define styling based on the sender
+    // Original styling: Organizer (was 'isMe'): White bg, Blue border. Volunteer: Green[100] bg, Green[300] border.
+    final Color bubbleColor = isOrganizerMessage
+        ? Colors.white
+        : Colors.green[100]!;
+    final Border bubbleBorder = isOrganizerMessage
+        ? Border.all(color: Colors.blue, width: 1.5)
+        : Border.all(color: Colors.green[300]!);
+
+    final Color nameColor = isOrganizerMessage
+        ? Colors.blue[800]!
+        : Colors.green[800]!;
+    final Color timeColor = isOrganizerMessage
+        ? Colors.blue[600]!
+        : Colors.green[600]!;
+
+    // Align text within the bubble (start for left-aligned bubbles, end for right-aligned bubbles)
+    final CrossAxisAlignment textAlignmentInsideBubble = isOrganizerMessage
+        ? CrossAxisAlignment.start
+        : CrossAxisAlignment.end;
+
     return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: bubbleAlignment,
       child: Container(
-        margin: const EdgeInsets.all(8),
+        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         padding: const EdgeInsets.all(12),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.7,
+          maxWidth:
+              MediaQuery.of(context).size.width * 0.75, // Max width of bubble
         ),
         decoration: BoxDecoration(
-          color: isMe ? Colors.white : Colors.green[100],
-          border: isMe
-              ? Border.all(color: Colors.blue, width: 1.5)
-              : Border.all(color: Colors.green[300]!),
+          color: bubbleColor,
+          border: bubbleBorder,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withOpacity(0.2),
               spreadRadius: 1,
-              blurRadius: 2,
+              blurRadius: 3,
+              offset: const Offset(0, 1),
             ),
           ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: textAlignmentInsideBubble,
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              isMe ? widget.organizerName : widget.volunteerName,
+              displayName,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
-                color: isMe ? Colors.blue[800] : Colors.green[800],
+                color: nameColor,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(text),
             const SizedBox(height: 4),
             Text(
-              DateFormat('hh:mm a').format(DateTime.now()),
-              style: TextStyle(
-                fontSize: 10,
-                color: isMe ? Colors.blue[600] : Colors.green[600],
-              ),
+              textContent,
+              // textAlign: isOrganizerMessage ? TextAlign.start : TextAlign.end, // Optional: explicit text align
             ),
+            const SizedBox(height: 4),
+            if (firestoreTimestamp != null)
+              Text(
+                DateFormat('hh:mm a').format(
+                  firestoreTimestamp.toDate(),
+                ), // Format the actual message timestamp
+                style: TextStyle(fontSize: 10, color: timeColor),
+              )
+            else // Fallback for timestamp if not available (e.g., message sending)
+              Text(
+                "sending...",
+                style: TextStyle(
+                  fontSize: 10,
+                  fontStyle: FontStyle.italic,
+                  color: timeColor.withOpacity(0.7),
+                ),
+              ),
           ],
         ),
       ),
@@ -149,17 +229,27 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
   }
 
   void _sendMessage() async {
-    if (_messageController.text.isEmpty) return;
+    final messageText = _messageController.text.trim();
+    if (messageText.isEmpty) return;
 
-    await _firestore
-        .collection('chats')
-        .doc(_chatId)
-        .collection('messages')
-        .add({
-          'text': _messageController.text,
-          'senderId': widget.organizerId,
-          'timestamp': FieldValue.serverTimestamp(), // Add this line
-        });
+    final currentUser = _auth.currentUser;
+    if (currentUser == null) {
+      // Handle error: user not logged in
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Error: You are not logged in.")),
+      );
+      return;
+    }
+
+    final String currentUserId = currentUser.uid;
+
+    // It's crucial that senderId is the ID of the person actually sending the message
+    await _firestore.collection('chats').doc(_chatId).collection('messages').add({
+      'text': messageText,
+      'senderId': currentUserId, // Use the ID of the currently logged-in user
+      'timestamp':
+          FieldValue.serverTimestamp(), // Use server timestamp for consistency
+    });
 
     _messageController.clear();
   }
