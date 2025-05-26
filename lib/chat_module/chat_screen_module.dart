@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:volunter_management/uitls/colors.dart';
 
 class ChatScreenModule extends StatefulWidget {
   final String volunteerId;
@@ -49,15 +50,20 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
 
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: colorWhite),
+        backgroundColor: mainColor,
         // title: Text(chatPartnerName.isNotEmpty ? "Chat with $chatPartnerName" : "Chat"), // Alternative title
         title: Column(
           // Keeping your original title structure
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Org: ${widget.organizerName}"), // Prefixing for clarity
+            Text(
+              "Org: ${widget.organizerName}",
+              style: TextStyle(color: colorWhite),
+            ), // Prefixing for clarity
             Text(
               "Vol: ${widget.volunteerName}",
-              style: const TextStyle(fontSize: 14),
+              style: TextStyle(fontSize: 14, color: colorWhite),
             ),
           ],
         ),
