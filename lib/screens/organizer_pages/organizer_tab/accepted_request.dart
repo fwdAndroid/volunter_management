@@ -113,7 +113,12 @@ class _AcceptedRequestState extends State<AcceptedRequest> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatScreenModule(request: request),
+        builder: (context) => ChatScreenModule(
+          volunteerId: request['volunteerId'],
+          volunteerName: request['volunteerName'],
+          eventId: request['eventId'],
+          organizerId: request['organizerId'],
+        ),
       ),
     );
   }

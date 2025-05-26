@@ -1,11 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreenModule extends StatefulWidget {
-  final Map<String, dynamic> request;
+  final String volunteerId;
+  final String volunteerName;
+  final String eventId;
+  final String organizerId;
 
-  const ChatScreenModule({super.key, required this.request});
+  const ChatScreenModule({
+    super.key,
+    required this.volunteerId,
+    required this.volunteerName,
+    required this.eventId,
+    required this.organizerId,
+  });
 
   @override
   State<ChatScreenModule> createState() => _ChatScreenModuleState();
@@ -14,11 +22,10 @@ class ChatScreenModule extends StatefulWidget {
 class _ChatScreenModuleState extends State<ChatScreenModule> {
   final TextEditingController _messageController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final User? _currentUser = FirebaseAuth.instance.currentUser;
 
   String get _chatId {
-    final ids = [widget.request['volunteerId'], _currentUser!.uid]..sort();
-    return '${ids[0]}_${ids[1]}_${widget.request['eventId']}';
+    final ids = [widget.volunteerId, widget.organizerId]..sort();
+    return '${ids[0]}_${ids[1]}_${widget.eventId}';
   }
 
   @override
@@ -28,11 +35,8 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Chat with ${widget.request['volunteerName']}'),
-            Text(
-              'Event: ${widget.request['eventName']}',
-              style: const TextStyle(fontSize: 14),
-            ),
+            Text(widget.volunteerName),
+            Text(widget.eventId, style: const TextStyle(fontSize: 14)),
           ],
         ),
       ),
@@ -52,21 +56,14 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
                 }
 
                 return ListView.builder(
-                  reverse: false,
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
                     final message =
                         snapshot.data!.docs[index].data()
                             as Map<String, dynamic>;
-                    final isMe = message['senderId'] == _currentUser!.uid;
+                    final isMe = message['senderId'] == widget.organizerId;
 
-                    return _buildMessageBubble(
-                      message['text'],
-                      isMe,
-                      isMe
-                          ? widget.request['organizationName']
-                          : widget.request['volunteerName'],
-                    );
+                    return _buildMessageBubble(message['text'], isMe);
                   },
                 );
               },
@@ -97,7 +94,7 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
     );
   }
 
-  Widget _buildMessageBubble(String text, bool isMe, String senderName) {
+  Widget _buildMessageBubble(String text, bool isMe) {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -110,21 +107,7 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
           color: isMe ? Colors.blue[100] : Colors.grey[300],
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              senderName,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: isMe ? Colors.blue[800] : Colors.grey[800],
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(text),
-          ],
-        ),
+        child: Text(text),
       ),
     );
   }
@@ -138,7 +121,7 @@ class _ChatScreenModuleState extends State<ChatScreenModule> {
         .collection('messages')
         .add({
           'text': _messageController.text,
-          'senderId': _currentUser!.uid,
+          'senderId': widget.organizerId,
           'timestamp': FieldValue.serverTimestamp(),
         });
 
