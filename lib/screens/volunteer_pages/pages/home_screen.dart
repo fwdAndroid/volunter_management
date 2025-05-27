@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:readmore/readmore.dart';
 import 'package:volunter_management/screens/volunteer_pages/voluntere_events/view_events_volunteer.dart';
 import 'package:volunter_management/uitls/colors.dart';
@@ -116,7 +117,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                                 Text(
-                                  post['date'].toString(),
+                                  post['date'] != null
+                                      ? DateFormat('yyyy-MM-dd – HH:mm').format(
+                                          (post['date'] as Timestamp).toDate(),
+                                        )
+                                      : 'N/A',
                                   style: GoogleFonts.poppins(
                                     color: black,
                                     fontWeight: FontWeight.w500,
@@ -159,9 +164,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                         description: post['description'],
                                         titleName: post['eventName'],
                                         image: post['image'],
-                                        dateTime: post['date'],
+                                        dateTime: post['date'] != null
+                                            ? DateFormat(
+                                                'yyyy-MM-dd – HH:mm',
+                                              ).format(
+                                                (post['date'] as Timestamp)
+                                                    .toDate(),
+                                              )
+                                            : 'N/A',
                                         eventTime: post['eventTime'],
-                                        eventDate: post['date'],
+                                        eventDate: post['eventDate'],
                                         organizationName: post['userName'],
                                         organizationUid: post['uid'],
                                       ),

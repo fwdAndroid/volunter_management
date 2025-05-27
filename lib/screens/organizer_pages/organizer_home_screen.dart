@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:readmore/readmore.dart';
 import 'package:volunter_management/screens/organizer_pages/events/add_event.dart';
 import 'package:volunter_management/screens/organizer_pages/events/view_events.dart';
@@ -126,7 +127,11 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
                                   ),
                                 ),
                                 Text(
-                                  post['date'].toString(),
+                                  post['date'] != null
+                                      ? DateFormat('yyyy-MM-dd – HH:mm').format(
+                                          (post['date'] as Timestamp).toDate(),
+                                        )
+                                      : 'N/A',
                                   style: GoogleFonts.poppins(
                                     color: black,
                                     fontWeight: FontWeight.w500,
@@ -136,6 +141,7 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
                               ],
                             ),
                           ),
+
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: ReadMoreText(
@@ -169,9 +175,14 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
                                         description: post['description'],
                                         titleName: post['eventName'],
                                         image: post['image'],
-                                        dateTime: post['date'],
+                                        dateTime: post['date'] != null
+                                            ? DateFormat('yyyy-MM-dd').format(
+                                                (post['date'] as Timestamp)
+                                                    .toDate(),
+                                              )
+                                            : 'N/A',
                                         eventTime: post['eventTime'],
-                                        eventDate: post['date'],
+                                        eventDate: post['eventDate'],
                                       ),
                                     ),
                                   );

@@ -20,6 +20,7 @@ class _VolunteerChatScreenState extends State<VolunteerChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           'Chat with Organizer',
           style: TextStyle(color: Colors.white),

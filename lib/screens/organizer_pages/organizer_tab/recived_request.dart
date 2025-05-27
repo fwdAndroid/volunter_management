@@ -139,6 +139,10 @@ class _RecivedRequestState extends State<RecivedRequest> {
                         'Event: ${request['eventName'] ?? 'Unknown Event'}',
                         style: TextStyle(color: Colors.grey[600]),
                       ),
+                      Text(
+                        'Working Hrs: ${request['hours'].toString()} hrs',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
                     ],
                   ),
                 ],

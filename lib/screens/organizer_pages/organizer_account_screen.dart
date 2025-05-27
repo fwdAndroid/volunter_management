@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:volunter_management/screens/organizer_pages/events/edit_event.dart';
 import 'package:volunter_management/screens/organizer_pages/organizer_setting/organizer_setting.dart';
 import 'package:volunter_management/uitls/colors.dart';
@@ -170,7 +171,14 @@ class _OrganizerAcountScreenState extends State<OrganizerAcountScreen> {
                                         ),
                                       ),
                                       Text(
-                                        post['date'].toString(),
+                                        post['date'] != null
+                                            ? DateFormat(
+                                                'yyyy-MM-dd – HH:mm',
+                                              ).format(
+                                                (post['date'] as Timestamp)
+                                                    .toDate(),
+                                              )
+                                            : 'N/A',
                                         style: GoogleFonts.poppins(
                                           color: black,
                                           fontWeight: FontWeight.w500,
