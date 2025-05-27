@@ -177,6 +177,33 @@ class _AddEventState extends State<AddEvent> {
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
                     onPressed: () async {
+                      if (serviceNameController.text.trim().isEmpty) {
+                        showMessageBar("Please enter the event name.", context);
+                        return; // Stop execution
+                      }
+                      if (descriptionController.text.trim().isEmpty) {
+                        showMessageBar(
+                          "Please enter the event description.",
+                          context,
+                        );
+                        return; // Stop execution
+                      }
+                      if (selectedDate == null) {
+                        // Or check dateController.text.isEmpty
+                        showMessageBar(
+                          "Please select the event date.",
+                          context,
+                        );
+                        return; // Stop execution
+                      }
+                      if (selectedTime == null) {
+                        // Or check timeController.text.isEmpty
+                        showMessageBar(
+                          "Please select the event time.",
+                          context,
+                        );
+                        return; // Stop execution
+                      }
                       setState(() {
                         isLoading = true;
                       });

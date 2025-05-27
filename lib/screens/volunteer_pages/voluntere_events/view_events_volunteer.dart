@@ -198,6 +198,7 @@ class _ViewEventsVolunteerState extends State<ViewEventsVolunteer> {
                                                   widget.organizationName,
                                               "timestamp":
                                                   FieldValue.serverTimestamp(),
+                                              "eventImage": widget.image,
                                             });
 
                                         ScaffoldMessenger.of(
