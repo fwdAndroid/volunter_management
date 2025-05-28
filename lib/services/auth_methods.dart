@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:volunter_management/uitls/show_message_bar.dart';
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -9,41 +7,44 @@ class AuthMethods {
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  Future<User?> signUpUser({
-    required BuildContext context,
-    required String fullName,
+  Future<String> signUpUser({
     required String email,
     required String password,
+    required String fullName,
     required String type,
   }) async {
+    String res = "Some error occurred";
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
-
-      await userCredential.user?.sendEmailVerification(); // ✅ Send verification
-
-      // Store additional user info in Firestore if needed
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .set({
-            'fullName': fullName,
-            'email': email,
-            'type': type,
-            'uid': userCredential.user!.uid,
-            'password': password,
-            'isVerified': false,
-          });
-
-      showMessageBar(
-        "Verification email sent! Please check your inbox.",
-        context,
+      // Try creating user
+      UserCredential cred = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-      return userCredential.user;
+
+      // Save user to database (Firestore/Realtime DB)
+      await _firestore.collection('users').doc(cred.user!.uid).set({
+        'uid': cred.user!.uid,
+        'email': email,
+        'fullName': fullName,
+        'password': password,
+        'type': type,
+        'createdAt': DateTime.now(),
+      });
+
+      // Send email verification
+      await cred.user!.sendEmailVerification();
+
+      res = "success";
+    } on FirebaseAuthException catch (err) {
+      if (err.code == 'email-already-in-use') {
+        res = 'Email is already used. Try logging in.';
+      } else {
+        res = err.message ?? "An error occurred";
+      }
     } catch (e) {
-      showMessageBar(e.toString(), context);
-      return null;
+      res = e.toString();
     }
+    return res;
   }
 
   Future<String> loginUpUser({

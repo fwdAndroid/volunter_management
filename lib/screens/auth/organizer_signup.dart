@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:volunter_management/screens/auth/login_screen.dart';
 import 'package:volunter_management/screens/auth/signup_screen.dart';
-import 'package:volunter_management/screens/main/organizer_main_dashboard.dart';
 import 'package:volunter_management/services/auth_methods.dart';
 import 'package:volunter_management/uitls/colors.dart';
-import 'package:volunter_management/uitls/show_message_bar.dart';
 
 class OrganizerSignup extends StatefulWidget {
   const OrganizerSignup({super.key});
@@ -166,38 +164,42 @@ class _OrganizerSignupState extends State<OrganizerSignup> {
                   ? Center(child: CircularProgressIndicator())
                   : ElevatedButton(
                       onPressed: () async {
-                        if (userNameController.text.isEmpty) {
-                          showMessageBar("User Name is Required", context);
-                        } else if (emailController.text.isEmpty) {
-                          showMessageBar("Email is Required", context);
-                        } else if (passController.text.isEmpty) {
-                          showMessageBar("Password is Required", context);
-                        } else {
-                          setState(() {
-                            isLoading = true;
-                          });
+                        setState(() {
+                          isLoading = true;
+                        });
 
-                          if (_formKey.currentState?.validate() ?? false) {
-                            await AuthMethods().signUpUser(
-                              context: context,
-                              fullName: userNameController.text.trim(),
+                        String result = await AuthMethods().signUpUser(
+                          email: emailController.text.trim(),
+                          password: passController.text.trim(),
+                          fullName: userNameController.text.trim(),
+                          type: "Organizer",
+                        );
 
-                              email: emailController.text.trim(),
-
-                              password: passController.text.trim(),
-
-                              type: "Organizer",
-                            );
-                          }
-                          showMessageBar(
-                            "Verify your email check your inbox or spam folder",
-                            context,
+                        if (result == "success") {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                "Account created! Verify your email.",
+                              ),
+                            ),
                           );
-                          setState(() {
-                            isLoading = false;
-                          });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (builder) => LoginScreen(),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(result)));
                         }
+
+                        setState(() {
+                          isLoading = false;
+                        });
                       },
+
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30), // <-- Radius
