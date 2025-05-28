@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:volunter_management/models/user_models.dart';
-import 'package:volunter_management/screens/main/main_dashboard.dart';
-import 'package:volunter_management/screens/main/organizer_main_dashboard.dart';
+import 'package:volunter_management/uitls/show_message_bar.dart';
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -11,7 +9,7 @@ class AuthMethods {
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  Future<void> signUpUser({
+  Future<User?> signUpUser({
     required BuildContext context,
     required String fullName,
     required String email,
@@ -19,44 +17,33 @@ class AuthMethods {
     required String type,
   }) async {
     try {
-      List<String> methods = await FirebaseAuth.instance
-          .fetchSignInMethodsForEmail(email);
-      if (methods.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Email is already registered')),
-        );
-        return null;
-      }
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
 
-      if (email.isNotEmpty && password.isNotEmpty && fullName.isNotEmpty) {
-        UserCredential cred = await _auth.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
+      await userCredential.user?.sendEmailVerification(); // ✅ Send verification
 
-        UserModel userModel = UserModel(
-          uuid: cred.user!.uid,
-          type: type,
-          fullName: fullName,
-          email: email,
-          password: password,
-        );
+      // Store additional user info in Firestore if needed
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set({
+            'fullName': fullName,
+            'email': email,
+            'type': type,
+            'uid': userCredential.user!.uid,
+            'password': password,
+            'isVerified': false,
+          });
 
-        await _firestore
-            .collection('users')
-            .doc(cred.user!.uid)
-            .set(userModel.toJson());
-        // Optional: Show success and navigate
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Registration successful")));
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(
+      showMessageBar(
+        "Verification email sent! Please check your inbox.",
         context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      );
+      return userCredential.user;
+    } catch (e) {
+      showMessageBar(e.toString(), context);
+      return null;
     }
-    return null;
   }
 
   Future<String> loginUpUser({

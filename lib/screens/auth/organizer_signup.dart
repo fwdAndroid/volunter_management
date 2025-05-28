@@ -189,11 +189,9 @@ class _OrganizerSignupState extends State<OrganizerSignup> {
                               type: "Organizer",
                             );
                           }
-                          Navigator.pushReplacement(
+                          showMessageBar(
+                            "Verify your email check your inbox or spam folder",
                             context,
-                            MaterialPageRoute(
-                              builder: (builder) => OrganizerMainDashboard(),
-                            ),
                           );
                           setState(() {
                             isLoading = false;

@@ -188,11 +188,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               type: "Volunteer",
                             );
                           }
-                          Navigator.pushReplacement(
+                          showMessageBar(
+                            "Verify your email check your inbox or spam folder",
                             context,
-                            MaterialPageRoute(
-                              builder: (builder) => MainDashboard(),
-                            ),
                           );
                           setState(() {
                             isLoading = false;

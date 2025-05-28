@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,7 +18,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passController = TextEditingController();
-  bool isGoogle = false;
   bool _isPasswordVisible = false;
   bool isLoading = false;
   bool isChecked = false;
@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Image.asset(
-                'assets/logo.png', // Replace with your icon asset
+                'assets/logo.png',
                 height: 200,
                 fit: BoxFit.cover,
               ),
@@ -63,18 +63,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: mainColor),
                   ),
-                  fillColor: textColor,
                   prefixIcon: IconButton(
                     icon: const Icon(Icons.person, color: Color(0xff64748B)),
                     onPressed: () {},
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
-                  }
-                  return null;
-                },
               ),
             ),
             Padding(
@@ -100,7 +93,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: mainColor),
                   ),
-                  fillColor: textColor,
                   prefixIcon: Icon(Icons.lock, color: Color(0xff64748B)),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -116,12 +108,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
-                  }
-                  return null;
-                },
               ),
             ),
             Padding(
@@ -174,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30), // <-- Radius
+                  borderRadius: BorderRadius.circular(30),
                 ),
                 backgroundColor: mainColor,
                 fixedSize: const Size(320, 60),
@@ -190,38 +176,57 @@ class _LoginScreenState extends State<LoginScreen> {
                 );
 
                 if (result == "success") {
-                  // Get user type
-                  String? userType = await AuthMethods().getUserType();
+                  await FirebaseAuth.instance.currentUser?.reload();
+                  final user = FirebaseAuth.instance.currentUser;
 
-                  if (userType == 'Organizer') {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => OrganizerMainDashboard(),
+                  if (user != null && user.emailVerified) {
+                    String? userType = await AuthMethods().getUserType();
+
+                    if (userType == 'Organizer') {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => OrganizerMainDashboard(),
+                        ),
+                      );
+                    } else if (userType == 'Volunteer') {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MainDashboard(),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Unknown user type: $userType")),
+                      );
+                      setState(() {
+                        isLoading = false;
+                      });
+                    }
+                  } else {
+                    await user?.sendEmailVerification();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "Please verify your email. A verification link has been sent.",
+                        ),
                       ),
                     );
-                  } else if (userType == 'Volunteer') {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => MainDashboard()),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Unknown user type: $userType")),
-                    );
+                    await FirebaseAuth.instance.signOut();
+                    setState(() {
+                      isLoading = false;
+                    });
                   }
                 } else {
-                  // Show error message
                   ScaffoldMessenger.of(
                     context,
                   ).showSnackBar(SnackBar(content: Text(result)));
+                  setState(() {
+                    isLoading = false;
+                  });
                 }
-
-                setState(() {
-                  isLoading = false;
-                });
               },
-
               child: isLoading
                   ? CircularProgressIndicator(color: colorWhite)
                   : Text("Login", style: TextStyle(color: colorWhite)),
@@ -273,9 +278,9 @@ class _LoginScreenState extends State<LoginScreen> {
           TextButton(
             onPressed: () {
               if (Platform.isAndroid) {
-                SystemNavigator.pop(); // For Android
+                SystemNavigator.pop();
               } else if (Platform.isIOS) {
-                exit(0); // For iOS
+                exit(0);
               }
             },
             child: const Text('Yes'),
