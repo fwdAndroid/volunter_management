@@ -133,6 +133,8 @@ class _AcceptedRequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isTimeSent = request['status'] == 'send';
+
     return Card(
       margin: const EdgeInsets.all(8),
       child: Padding(
@@ -151,16 +153,116 @@ class _AcceptedRequestCard extends StatelessWidget {
             ),
             Text('Event Name: ${request['eventName']}'),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: onChat,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.chat),
-                  SizedBox(width: 8),
-                  Text('Open Chat'),
-                ],
-              ),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: onChat,
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.chat),
+                      SizedBox(width: 8),
+                      Text('Open Chat'),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (request['status'] != 'send' &&
+                    request['status'] != 'approved')
+                  TextButton(
+                    onPressed: () async {
+                      TextEditingController _hoursController =
+                          TextEditingController();
+
+                      await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text("Commitment Hours"),
+                          content: TextField(
+                            controller: _hoursController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              hintText:
+                                  "Enter number of hours you'll volunteer",
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                if (_hoursController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Please enter hours"),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                if (int.tryParse(_hoursController.text) ==
+                                    null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Invalid number format"),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                await FirebaseFirestore.instance
+                                    .collection("joinevents")
+                                    .doc(request['uuid'])
+                                    .update({
+                                      "hours": int.parse(_hoursController.text),
+                                      "status": "send",
+                                    });
+                                Navigator.pop(context, true);
+                              },
+                              child: Text("Send"),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.insert_chart_outlined_sharp),
+                        SizedBox(width: 8),
+                        Text('Add Work Time'),
+                      ],
+                    ),
+                  )
+                else if (request['status'] == 'approved')
+                  const Text(
+                    "Time Approved",
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                else if (request['status'] == "cancel")
+                  Text(
+                    "Not Approved",
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                else
+                  const Text(
+                    "Time Sent To Approved",
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
             ),
           ],
         ),

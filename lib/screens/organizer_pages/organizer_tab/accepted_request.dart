@@ -162,8 +162,79 @@ class _AcceptedRequestCard extends StatelessWidget {
                 ],
               ),
             ),
+            // ✅ Conditional status message or view button
+            if (request['status'] == 'approved') ...[
+              const Text(
+                "Request Accepted",
+                style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ] else if (request['status'] == 'cancel') ...[
+              const Text(
+                "Request Cancelled",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ] else ...[
+              TextButton(
+                onPressed: () => showRequestDetails(context),
+                child: const Text("View Request"),
+              ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  void showRequestDetails(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Request Details"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Volunteer: ${request['volunteerName']}"),
+            const SizedBox(height: 8),
+            Text("Event: ${request['eventName']}"),
+            const SizedBox(height: 8),
+            Text("Working Hours: ${request['hours'] ?? 'Not Provided'}"),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Close"),
+          ),
+          TextButton(
+            onPressed: () async {
+              await FirebaseFirestore.instance
+                  .collection('joinevents')
+                  .doc(request['uuid']) // Ensure uuid exists in request
+                  .update({'status': 'cancel'});
+              Navigator.pop(context);
+            },
+            child: const Text("Decline", style: TextStyle(color: Colors.red)),
+          ),
+          TextButton(
+            onPressed: () async {
+              await FirebaseFirestore.instance
+                  .collection('joinevents')
+                  .doc(request['uuid'])
+                  .update({'status': 'approved'});
+              Navigator.pop(context);
+            },
+            child: const Text("Approve", style: TextStyle(color: Colors.green)),
+          ),
+        ],
       ),
     );
   }

@@ -172,123 +172,58 @@ class _ViewEventsVolunteerState extends State<ViewEventsVolunteer> {
                                   ? null
                                   : () async {
                                       // Show the dialog first
-                                      bool? shouldSend = await showDialog<bool>(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: Text("Commitment Hours"),
-                                          content: TextField(
-                                            controller: _hoursController,
-                                            keyboardType: TextInputType.number,
-                                            decoration: InputDecoration(
-                                              hintText:
-                                                  "Enter number of hours you'll volunteer",
-                                              border: OutlineInputBorder(),
+
+                                      try {
+                                        final uuid = Uuid().v4();
+                                        await FirebaseFirestore.instance
+                                            .collection("joinevents")
+                                            .doc(uuid)
+                                            .set({
+                                              "uuid": uuid,
+                                              "hours": 0,
+                                              "isJoined": false,
+                                              "eventName": widget.titleName,
+                                              "eventDescription":
+                                                  widget.description,
+                                              "eventDate": widget.eventDate,
+                                              "organizerId":
+                                                  widget.organizationUid,
+                                              "eventId": widget.uuid,
+                                              "eventTime": widget.eventTime,
+                                              "volunteerName": snap['fullName'],
+                                              "volunteerId": FirebaseAuth
+                                                  .instance
+                                                  .currentUser!
+                                                  .uid,
+                                              "organizationUid":
+                                                  widget.organizationUid,
+                                              "organizationName":
+                                                  widget.organizationName,
+                                              "timestamp":
+                                                  FieldValue.serverTimestamp(),
+                                              "eventImage": widget.image,
+                                              "status": "pending",
+                                            });
+
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text("Join request sent!"),
+                                          ),
+                                        );
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              "Error: ${e.toString()}",
                                             ),
                                           ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context, false),
-                                              child: Text("Cancel"),
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                if (_hoursController
-                                                    .text
-                                                    .isEmpty) {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        "Please enter hours",
-                                                      ),
-                                                    ),
-                                                  );
-                                                  return;
-                                                }
-                                                if (int.tryParse(
-                                                      _hoursController.text,
-                                                    ) ==
-                                                    null) {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        "Invalid number format",
-                                                      ),
-                                                    ),
-                                                  );
-                                                  return;
-                                                }
-                                                Navigator.pop(context, true);
-                                              },
-                                              child: Text("Send"),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-
-                                      if (shouldSend ?? false) {
-                                        setState(() => _isLoading = true);
-                                        try {
-                                          final uuid = Uuid().v4();
-                                          await FirebaseFirestore.instance
-                                              .collection("joinevents")
-                                              .doc(uuid)
-                                              .set({
-                                                "uuid": uuid,
-                                                "hours": int.parse(
-                                                  _hoursController.text,
-                                                ), // Add hours to document
-                                                "isJoined": false,
-                                                "eventName": widget.titleName,
-                                                "eventDescription":
-                                                    widget.description,
-                                                "eventDate": widget.eventDate,
-                                                "organizerId":
-                                                    widget.organizationUid,
-                                                "eventId": widget.uuid,
-                                                "eventTime": widget.eventTime,
-                                                "volunteerName":
-                                                    snap['fullName'],
-                                                "volunteerId": FirebaseAuth
-                                                    .instance
-                                                    .currentUser!
-                                                    .uid,
-                                                "organizationUid":
-                                                    widget.organizationUid,
-                                                "organizationName":
-                                                    widget.organizationName,
-                                                "timestamp":
-                                                    FieldValue.serverTimestamp(),
-                                                "eventImage": widget.image,
-                                              });
-
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                "Join request sent!",
-                                              ),
-                                            ),
-                                          );
-                                        } catch (e) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                "Error: ${e.toString()}",
-                                              ),
-                                            ),
-                                          );
-                                        } finally {
-                                          _hoursController.clear();
-                                          setState(() => _isLoading = false);
-                                        }
+                                        );
+                                      } finally {
+                                        setState(() => _isLoading = false);
                                       }
                                     },
                             ),
