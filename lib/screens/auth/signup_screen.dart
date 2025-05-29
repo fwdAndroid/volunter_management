@@ -43,7 +43,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: TextFormField(
                   controller: userNameController,
                   decoration: InputDecoration(
-                    hintText: 'Organization Name',
+                    hintText: 'Full Name',
                     hintStyle: GoogleFonts.poppins(
                       color: textColor,
                       fontSize: 14,
