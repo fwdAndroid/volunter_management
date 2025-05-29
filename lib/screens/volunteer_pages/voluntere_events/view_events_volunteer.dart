@@ -180,7 +180,7 @@ class _ViewEventsVolunteerState extends State<ViewEventsVolunteer> {
                                             .doc(uuid)
                                             .set({
                                               "uuid": uuid,
-                                              "hours": 0,
+                                              "hours": [],
                                               "isJoined": false,
                                               "eventName": widget.titleName,
                                               "eventDescription":

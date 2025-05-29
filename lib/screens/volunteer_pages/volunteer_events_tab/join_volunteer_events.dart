@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:volunter_management/chat_module/chat_screen_module.dart';
 
 class JoinVolunteerEvents extends StatefulWidget {
@@ -125,15 +126,94 @@ class _JoinVolunteerEventsState extends State<JoinVolunteerEvents> {
   }
 }
 
-class _AcceptedRequestCard extends StatelessWidget {
+class _AcceptedRequestCard extends StatefulWidget {
   final Map<String, dynamic> request;
-  final VoidCallback onChat;
+  final VoidCallback? onChat;
+  const _AcceptedRequestCard({
+    Key? key,
+    required this.request,
+    required this.onChat,
+  }) : super(key: key);
 
-  const _AcceptedRequestCard({required this.request, required this.onChat});
+  @override
+  State<_AcceptedRequestCard> createState() => _AcceptedRequestCardState();
+}
+
+class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
+  List<Map<String, dynamic>> timeLogs = [];
+  TimeOfDay? selectedStartTime;
+  TimeOfDay? selectedEndTime;
+  bool isSubmitted = false;
+
+  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStartTime) {
+          selectedStartTime = picked;
+        } else {
+          selectedEndTime = picked;
+        }
+      });
+    }
+  }
+
+  void _addTimeLog() {
+    if (selectedStartTime == null || selectedEndTime == null) return;
+
+    final start = Duration(
+      hours: selectedStartTime!.hour,
+      minutes: selectedStartTime!.minute,
+    );
+    final end = Duration(
+      hours: selectedEndTime!.hour,
+      minutes: selectedEndTime!.minute,
+    );
+    final totalMinutes = end.inMinutes - start.inMinutes;
+
+    final hours = double.parse((totalMinutes / 60).toStringAsFixed(2));
+    final now = Timestamp.now();
+
+    setState(() {
+      timeLogs.add({
+        'startTime': selectedStartTime!.format(context),
+        'endTime': selectedEndTime!.format(context),
+        'hr': hours,
+        'timestamp': now,
+        'isJoined': false,
+      });
+      selectedStartTime = null;
+      selectedEndTime = null;
+    });
+  }
+
+  Future<void> _saveLogs() async {
+    if (timeLogs.isEmpty) return;
+
+    await FirebaseFirestore.instance
+        .collection("joinevents")
+        .doc(widget.request['uuid'])
+        .update({"hours": FieldValue.arrayUnion(timeLogs), "status": "send"});
+
+    setState(() {
+      isSubmitted = true;
+      timeLogs.clear();
+      selectedStartTime = null;
+      selectedEndTime = null;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Request sent, wait for approval.")),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final bool isTimeSent = request['status'] == 'send';
+    final request = widget.request;
+    final bool alreadySent = request['status'] == 'send';
 
     return Card(
       margin: const EdgeInsets.all(8),
@@ -142,128 +222,105 @@ class _AcceptedRequestCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Volunteer: ${request['volunteerName']}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            Text("Event Name: ${request['eventName'] ?? 'N/A'}"),
+            Text("Date: ${request['eventDate'] ?? 'N/A'}"),
+            Text("Time: ${request['eventTime'] ?? 'N/A'}"),
+            Text("Organizer Name: ${request['organizationName'] ?? 'N/A'}"),
+            Text("Status: ${request['status'] ?? 'N/A'}"),
+
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.chat),
+              label: const Text("Chat"),
+              onPressed: () {
+                // Navigate to chat screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatScreenModule(
+                      organizerName: request['organizationName'],
+                      volunteerId: request['volunteerId'],
+                      volunteerName: request['volunteerName'],
+                      eventId: request['eventId'],
+                      organizerId: request['organizerId'],
+                    ),
+                  ),
+                );
+              },
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Organizer: ${request['organizationName']}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text('Event Name: ${request['eventName']}'),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                ElevatedButton(
-                  onPressed: onChat,
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.chat),
-                      SizedBox(width: 8),
-                      Text('Open Chat'),
-                    ],
+
+            if (!isSubmitted && !alreadySent) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => _selectTime(context, true),
+                      child: InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: "Start Time",
+                        ),
+                        child: Text(
+                          selectedStartTime != null
+                              ? selectedStartTime!.format(context)
+                              : "Select",
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => _selectTime(context, false),
+                      child: InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: "End Time",
+                        ),
+                        child: Text(
+                          selectedEndTime != null
+                              ? selectedEndTime!.format(context)
+                              : "Select",
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: _addTimeLog,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              ...timeLogs.map(
+                (log) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text(
+                    "${log['startTime']} - ${log['endTime']}: ${log['hr']} hrs",
                   ),
                 ),
-                const SizedBox(width: 8),
-                if (request['status'] != 'send' &&
-                    request['status'] != 'approved')
-                  TextButton(
-                    onPressed: () async {
-                      TextEditingController _hoursController =
-                          TextEditingController();
+              ),
 
-                      await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text("Commitment Hours"),
-                          content: TextField(
-                            controller: _hoursController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              hintText:
-                                  "Enter number of hours you'll volunteer",
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: Text("Cancel"),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                if (_hoursController.text.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("Please enter hours"),
-                                    ),
-                                  );
-                                  return;
-                                }
-                                if (int.tryParse(_hoursController.text) ==
-                                    null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("Invalid number format"),
-                                    ),
-                                  );
-                                  return;
-                                }
-                                await FirebaseFirestore.instance
-                                    .collection("joinevents")
-                                    .doc(request['uuid'])
-                                    .update({
-                                      "hours": int.parse(_hoursController.text),
-                                      "status": "send",
-                                    });
-                                Navigator.pop(context, true);
-                              },
-                              child: Text("Send"),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.insert_chart_outlined_sharp),
-                        SizedBox(width: 8),
-                        Text('Add Work Time'),
-                      ],
-                    ),
-                  )
-                else if (request['status'] == 'approved')
-                  const Text(
-                    "Time Approved",
-                    style: TextStyle(
-                      fontStyle: FontStyle.italic,
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                else if (request['status'] == "cancel")
-                  Text(
-                    "Not Approved",
-                    style: TextStyle(
-                      fontStyle: FontStyle.italic,
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                else
-                  const Text(
-                    "Time Sent To Approved",
-                    style: TextStyle(
-                      fontStyle: FontStyle.italic,
-                      color: Colors.orange,
-                      fontWeight: FontWeight.bold,
-                    ),
+              const SizedBox(height: 16),
+
+              if (timeLogs.isNotEmpty)
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.save),
+                  label: const Text("Save"),
+                  onPressed: _saveLogs,
+                ),
+            ] else if (isSubmitted || alreadySent) ...[
+              const SizedBox(height: 16),
+              const Center(
+                child: Text(
+                  "Request is sent, wait for approval.",
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
                   ),
-              ],
-            ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

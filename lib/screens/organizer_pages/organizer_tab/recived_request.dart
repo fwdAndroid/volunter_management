@@ -17,7 +17,6 @@ class _RecivedRequestState extends State<RecivedRequest> {
   final int _pageSize = 10;
   DocumentSnapshot? _lastDocument;
   bool _isLoadingMore = false;
-  String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -139,20 +138,12 @@ class _RecivedRequestState extends State<RecivedRequest> {
                         'Event: ${request['eventName'] ?? 'Unknown Event'}',
                         style: TextStyle(color: Colors.grey[600]),
                       ),
-                      Text(
-                        'Working Hrs: ${request['hours'].toString()} hrs',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
                     ],
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              // _buildDetailRow(
-              //   Icons.date_range,
-              //   _formatDate(request['timestamp']),
-              // ),
-              const SizedBox(height: 16),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -295,19 +286,6 @@ class _RecivedRequestState extends State<RecivedRequest> {
       icon: Icon(icon, size: 20),
       label: Text(text),
       onPressed: onPressed,
-    );
-  }
-
-  Widget _buildDetailRow(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: Colors.grey[600]),
-          const SizedBox(width: 8),
-          Text(text, style: TextStyle(color: Colors.grey[700], fontSize: 14)),
-        ],
-      ),
     );
   }
 }
