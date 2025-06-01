@@ -163,78 +163,130 @@ class _AcceptedRequestCard extends StatelessWidget {
               ),
             ),
             // ✅ Conditional status message or view button
-            if (request['status'] == 'approved') ...[
-              const Text(
-                "Request Accepted",
-                style: TextStyle(
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ] else if (request['status'] == 'cancel') ...[
-              const Text(
-                "Request Cancelled",
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ] else ...[
-              TextButton(
-                onPressed: () => showRequestDetails(context),
-                child: const Text("View Request"),
-              ),
-            ],
+            // if (request['status'] == 'approved') ...[
+            //   const Text(
+            //     "Request Accepted",
+            //     style: TextStyle(
+            //       color: Colors.green,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            // ] else if (request['status'] == 'cancel') ...[
+            //   const Text(
+            //     "Request Cancelled",
+            //     style: TextStyle(
+            //       color: Colors.red,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            // ] else ...[
+            TextButton(
+              onPressed: () => showRequestDetails(context),
+              child: const Text("View Request"),
+            ),
           ],
+          // ],
         ),
       ),
     );
   }
 
   void showRequestDetails(BuildContext context) {
+    final List<dynamic> hoursListRaw = request['hours'] ?? [];
+    List<Map<String, dynamic>> hoursList = hoursListRaw
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Request Details"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Volunteer: ${request['volunteerName']}"),
-            const SizedBox(height: 8),
-            Text("Event: ${request['eventName']}"),
-            const SizedBox(height: 8),
-            Text("Working Hours: ${request['hours'] ?? 'Not Provided'}"),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text("Close"),
-          ),
-          TextButton(
-            onPressed: () async {
-              await FirebaseFirestore.instance
-                  .collection('joinevents')
-                  .doc(request['uuid']) // Ensure uuid exists in request
-                  .update({'status': 'cancel'});
-              Navigator.pop(context);
-            },
-            child: const Text("Decline", style: TextStyle(color: Colors.red)),
-          ),
-          TextButton(
-            onPressed: () async {
-              await FirebaseFirestore.instance
-                  .collection('joinevents')
-                  .doc(request['uuid'])
-                  .update({'status': 'approved'});
-              Navigator.pop(context);
-            },
-            child: const Text("Approve", style: TextStyle(color: Colors.green)),
-          ),
-        ],
+      builder: (_) => StatefulBuilder(
+        builder: (context, setState) {
+          void updateHourStatus(int index, String newStatus) async {
+            hoursList[index]['status'] = newStatus;
+
+            // Update hours array in Firestore
+            await FirebaseFirestore.instance
+                .collection('joinevents')
+                .doc(request['uuid'])
+                .update({'hours': hoursList});
+
+            // Check if at least one hour is approved
+            final bool hasApproved = hoursList.any(
+              (h) => h['status'] == 'approved',
+            );
+            final bool allDeclined = hoursList.every(
+              (h) => h['status'] == 'declined',
+            );
+
+            // Update overall request status
+            String requestStatus = hasApproved
+                ? 'approved'
+                : (allDeclined ? 'declined' : request['status']);
+            await FirebaseFirestore.instance
+                .collection('joinevents')
+                .doc(request['uuid'])
+                .update({'status': requestStatus});
+
+            setState(() {});
+          }
+
+          return AlertDialog(
+            title: const Text("Request Details"),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Volunteer: ${request['volunteerName']}"),
+                  const SizedBox(height: 8),
+                  Text("Event: ${request['eventName']}"),
+                  const SizedBox(height: 12),
+                  const Text("Logged Hours:"),
+                  const SizedBox(height: 8),
+                  if (hoursList.isEmpty) const Text("No hours submitted."),
+                  for (int i = 0; i < hoursList.length; i++)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        "⏰ ${hoursList[i]['startTime']} - ${hoursList[i]['endTime']} (${hoursList[i]['hr']} hr)",
+                      ),
+                      subtitle: Text(
+                        "Status: ${hoursList[i]['status'] ?? 'pending'}",
+                        style: TextStyle(
+                          color: hoursList[i]['status'] == 'approved'
+                              ? Colors.green
+                              : hoursList[i]['status'] == 'declined'
+                              ? Colors.red
+                              : Colors.grey,
+                        ),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                            ),
+                            onPressed: () => updateHourStatus(i, 'approved'),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.cancel, color: Colors.red),
+                            onPressed: () => updateHourStatus(i, 'declined'),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Close"),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

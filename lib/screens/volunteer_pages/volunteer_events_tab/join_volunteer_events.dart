@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:volunter_management/chat_module/chat_screen_module.dart';
 
 class JoinVolunteerEvents extends StatefulWidget {
@@ -50,6 +49,21 @@ class _JoinVolunteerEventsState extends State<JoinVolunteerEvents> {
     }
 
     setState(() => _isLoadingMore = false);
+  }
+
+  void _openChat(BuildContext context, Map<String, dynamic> request) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatScreenModule(
+          organizerName: request['organizationName'],
+          volunteerId: request['volunteerId'],
+          volunteerName: request['volunteerName'],
+          eventId: request['eventId'],
+          organizerId: request['organizerId'],
+        ),
+      ),
+    );
   }
 
   @override
@@ -109,21 +123,6 @@ class _JoinVolunteerEventsState extends State<JoinVolunteerEvents> {
       ),
     );
   }
-
-  void _openChat(BuildContext context, Map<String, dynamic> request) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatScreenModule(
-          organizerName: request['organizationName'],
-          volunteerId: request['volunteerId'],
-          volunteerName: request['volunteerName'],
-          eventId: request['eventId'],
-          organizerId: request['organizerId'],
-        ),
-      ),
-    );
-  }
 }
 
 class _AcceptedRequestCard extends StatefulWidget {
@@ -172,8 +171,15 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
       hours: selectedEndTime!.hour,
       minutes: selectedEndTime!.minute,
     );
-    final totalMinutes = end.inMinutes - start.inMinutes;
 
+    if (end <= start) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("End time must be after start time.")),
+      );
+      return;
+    }
+
+    final totalMinutes = end.inMinutes - start.inMinutes;
     final hours = double.parse((totalMinutes / 60).toStringAsFixed(2));
     final now = Timestamp.now();
 
@@ -184,6 +190,7 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
         'hr': hours,
         'timestamp': now,
         'isJoined': false,
+        'status': "send",
       });
       selectedStartTime = null;
       selectedEndTime = null;
@@ -200,7 +207,6 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
 
     setState(() {
       isSubmitted = true;
-      timeLogs.clear();
       selectedStartTime = null;
       selectedEndTime = null;
     });
@@ -213,7 +219,10 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
   @override
   Widget build(BuildContext context) {
     final request = widget.request;
-    final bool alreadySent = request['status'] == 'send';
+    final String status = request['status'] ?? '';
+    final bool alreadySent = status == 'send';
+    final bool isApproved = status == 'approved';
+    final List<dynamic> submittedLogs = request['hours'] ?? [];
 
     return Card(
       margin: const EdgeInsets.all(8),
@@ -226,30 +235,20 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
             Text("Date: ${request['eventDate'] ?? 'N/A'}"),
             Text("Time: ${request['eventTime'] ?? 'N/A'}"),
             Text("Organizer Name: ${request['organizationName'] ?? 'N/A'}"),
-            Text("Status: ${request['status'] ?? 'N/A'}"),
+            Text("Status: $status"),
 
             const SizedBox(height: 12),
+
             ElevatedButton.icon(
               icon: const Icon(Icons.chat),
               label: const Text("Chat"),
-              onPressed: () {
-                // Navigate to chat screen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatScreenModule(
-                      organizerName: request['organizationName'],
-                      volunteerId: request['volunteerId'],
-                      volunteerName: request['volunteerName'],
-                      eventId: request['eventId'],
-                      organizerId: request['organizerId'],
-                    ),
-                  ),
-                );
-              },
+              onPressed: widget.onChat,
             ),
 
-            if (!isSubmitted && !alreadySent) ...[
+            const SizedBox(height: 16),
+
+            // Show time log form only if not submitted yet
+            if (!isSubmitted && !alreadySent && !isApproved) ...[
               Row(
                 children: [
                   Expanded(
@@ -301,21 +300,43 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
                 ),
               ),
 
-              const SizedBox(height: 16),
-
               if (timeLogs.isNotEmpty)
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.save),
-                  label: const Text("Save"),
-                  onPressed: _saveLogs,
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.save),
+                    label: const Text("Save"),
+                    onPressed: _saveLogs,
+                  ),
                 ),
-            ] else if (isSubmitted || alreadySent) ...[
+            ],
+
+            // Always show submitted logs
+            if (submittedLogs.isNotEmpty) ...[
+              const Divider(),
+              const Text(
+                "Submitted Time Logs:",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              ...submittedLogs.map((log) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text(
+                    "${log['startTime']} - ${log['endTime']}: ${log['hr']} hrs (Status: ${log['status']})",
+                  ),
+                );
+              }).toList(),
+            ],
+
+            if (isSubmitted || alreadySent || isApproved) ...[
               const SizedBox(height: 16),
-              const Center(
+              Center(
                 child: Text(
-                  "Request is sent, wait for approval.",
+                  isApproved
+                      ? "Time log approved."
+                      : "Request is sent, wait for approval.",
                   style: TextStyle(
-                    color: Colors.green,
+                    color: isApproved ? Colors.blue : Colors.green,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

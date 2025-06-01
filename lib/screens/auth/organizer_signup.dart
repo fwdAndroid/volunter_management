@@ -43,7 +43,7 @@ class _OrganizerSignupState extends State<OrganizerSignup> {
                 child: TextFormField(
                   controller: userNameController,
                   decoration: InputDecoration(
-                    hintText: 'User Name',
+                    hintText: 'Organizor Name',
                     hintStyle: GoogleFonts.poppins(
                       color: textColor,
                       fontSize: 14,
@@ -79,7 +79,7 @@ class _OrganizerSignupState extends State<OrganizerSignup> {
                 child: TextFormField(
                   controller: emailController,
                   decoration: InputDecoration(
-                    hintText: 'Email',
+                    hintText: 'Organizor Email',
                     hintStyle: GoogleFonts.poppins(
                       color: textColor,
                       fontSize: 14,
