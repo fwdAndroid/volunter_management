@@ -65,83 +65,89 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Image.asset(
-              'assets/logo.png', // Replace with your icon asset
-              height: 200,
-              fit: BoxFit.cover,
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset(
+                'assets/logo.png', // Replace with your icon asset
+                height: 200,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Forgot Password",
+                    style: GoogleFonts.manrope(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                  ),
+                  Text(
+                    "Please type your email below and we will give you a OTP code",
+                    style: GoogleFonts.nunitoSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w300,
+                      color: textColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Center(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Forgot Password",
-                  style: GoogleFonts.manrope(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
+                Padding(
+                  padding: const EdgeInsets.only(top: 10.0, left: 16),
+                  child: Align(
+                    alignment: AlignmentDirectional.topStart,
+                    child: Text(
+                      'Email',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: mainColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
                 ),
-                Text(
-                  "Please type your email below and we will give you a OTP code",
-                  style: GoogleFonts.nunitoSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w300,
-                    color: textColor,
+                Container(
+                  margin: const EdgeInsets.only(left: 10, right: 10),
+                  padding: const EdgeInsets.all(8),
+                  child: TextFormField(
+                    controller: _emailController,
+                    style: GoogleFonts.plusJakartaSans(color: secondaryColor),
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.lock, color: secondaryColor),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: mainColor),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: mainColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: mainColor),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: mainColor),
+                      ),
+                      hintText: "Enter Email Address",
+                      hintStyle: GoogleFonts.plusJakartaSans(
+                        color: secondaryColor,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 10.0, left: 16),
-                child: Align(
-                  alignment: AlignmentDirectional.topStart,
-                  child: Text(
-                    'Email',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: mainColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(left: 10, right: 10),
-                padding: const EdgeInsets.all(8),
-                child: TextFormField(
-                  controller: _emailController,
-                  style: GoogleFonts.plusJakartaSans(color: secondaryColor),
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.lock, color: secondaryColor),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: mainColor),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: mainColor),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: mainColor),
-                    ),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: mainColor),
-                    ),
-                    hintText: "Enter Email Address",
-                    hintStyle: GoogleFonts.plusJakartaSans(
-                      color: secondaryColor,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
           Flexible(child: Container(), flex: 5),
 

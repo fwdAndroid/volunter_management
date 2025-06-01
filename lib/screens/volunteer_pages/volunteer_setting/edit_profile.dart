@@ -41,7 +41,7 @@ class _EditProfileState extends State<EditProfile> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(centerTitle: true, title: Text("Editar perfil")),
+        appBar: AppBar(centerTitle: true, title: Text("Edit Profile")),
         body: Column(
           children: [
             // Profile Image Section
