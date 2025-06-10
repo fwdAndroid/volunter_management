@@ -239,6 +239,10 @@ class _AcceptedRequestCard extends StatelessWidget {
                   Text("Volunteer: ${request['volunteerName']}"),
                   const SizedBox(height: 8),
                   Text("Event: ${request['eventName']}"),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Description: ${request['description'] ?? 'No description'}",
+                  ),
                   const SizedBox(height: 12),
                   const Text("Logged Hours:"),
                   const SizedBox(height: 8),

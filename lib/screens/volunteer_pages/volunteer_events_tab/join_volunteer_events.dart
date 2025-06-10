@@ -78,10 +78,6 @@ class _JoinVolunteerEventsState extends State<JoinVolunteerEvents> {
             .limit(_pageSize)
             .snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(
               child: Column(
@@ -108,7 +104,7 @@ class _JoinVolunteerEventsState extends State<JoinVolunteerEvents> {
               if (index >= requests.length) {
                 return const Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(child: Text("")),
                 );
               }
 
@@ -142,7 +138,7 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
   List<Map<String, dynamic>> timeLogs = [];
   TimeOfDay? selectedStartTime;
   TimeOfDay? selectedEndTime;
-  bool isSubmitted = false;
+  final TextEditingController _descController = TextEditingController();
 
   Future<void> _selectTime(BuildContext context, bool isStartTime) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -161,7 +157,14 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
   }
 
   void _addTimeLog() {
-    if (selectedStartTime == null || selectedEndTime == null) return;
+    if (selectedStartTime == null ||
+        selectedEndTime == null ||
+        _descController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please complete all fields.")),
+      );
+      return;
+    }
 
     final start = Duration(
       hours: selectedStartTime!.hour,
@@ -189,11 +192,13 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
         'endTime': selectedEndTime!.format(context),
         'hr': hours,
         'timestamp': now,
+        'description': _descController.text.trim(),
         'isJoined': false,
         'status': "send",
       });
       selectedStartTime = null;
       selectedEndTime = null;
+      _descController.clear();
     });
   }
 
@@ -205,22 +210,19 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
         .doc(widget.request['uuid'])
         .update({"hours": FieldValue.arrayUnion(timeLogs), "status": "send"});
 
-    setState(() {
-      isSubmitted = true;
-      selectedStartTime = null;
-      selectedEndTime = null;
-    });
-
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Request sent, wait for approval.")),
     );
+
+    setState(() {
+      timeLogs.clear();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final request = widget.request;
     final String status = request['status'] ?? '';
-    final bool alreadySent = status == 'send';
     final bool isApproved = status == 'approved';
     final List<dynamic> submittedLogs = request['hours'] ?? [];
 
@@ -247,71 +249,72 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
 
             const SizedBox(height: 16),
 
-            // Show time log form only if not submitted yet
-            if (!isSubmitted && !alreadySent && !isApproved) ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => _selectTime(context, true),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: "Start Time",
-                        ),
-                        child: Text(
-                          selectedStartTime != null
-                              ? selectedStartTime!.format(context)
-                              : "Select",
-                        ),
+            // Input time log UI
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () => _selectTime(context, true),
+                    child: InputDecorator(
+                      decoration: const InputDecoration(
+                        labelText: "Start Time",
+                      ),
+                      child: Text(
+                        selectedStartTime?.format(context) ?? "Select",
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => _selectTime(context, false),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: "End Time",
-                        ),
-                        child: Text(
-                          selectedEndTime != null
-                              ? selectedEndTime!.format(context)
-                              : "Select",
-                        ),
-                      ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: InkWell(
+                    onTap: () => _selectTime(context, false),
+                    child: InputDecorator(
+                      decoration: const InputDecoration(labelText: "End Time"),
+                      child: Text(selectedEndTime?.format(context) ?? "Select"),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle_outline),
-                    onPressed: _addTimeLog,
-                  ),
-                ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            TextField(
+              controller: _descController,
+              decoration: const InputDecoration(labelText: "Description"),
+            ),
+
+            const SizedBox(height: 8),
+
+            ElevatedButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text("Add Time Log"),
+              onPressed: _addTimeLog,
+            ),
+
+            const SizedBox(height: 8),
+
+            ...timeLogs.map(
+              (log) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Text(
+                  "${log['startTime']} - ${log['endTime']}: ${log['hr']} hrs | ${log['description']}",
+                ),
               ),
+            ),
 
-              const SizedBox(height: 12),
-
-              ...timeLogs.map(
-                (log) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Text(
-                    "${log['startTime']} - ${log['endTime']}: ${log['hr']} hrs",
-                  ),
+            if (timeLogs.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.save),
+                  label: const Text("Save"),
+                  onPressed: _saveLogs,
                 ),
               ),
 
-              if (timeLogs.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.save),
-                    label: const Text("Save"),
-                    onPressed: _saveLogs,
-                  ),
-                ),
-            ],
-
-            // Always show submitted logs
+            // Submitted logs
             if (submittedLogs.isNotEmpty) ...[
               const Divider(),
               const Text(
@@ -322,21 +325,19 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Text(
-                    "${log['startTime']} - ${log['endTime']}: ${log['hr']} hrs (Status: ${log['status']})",
+                    "${log['startTime']} - ${log['endTime']}: ${log['hr']} hrs | ${log['description'] ?? ''} (Status: ${log['status']})",
                   ),
                 );
               }).toList(),
             ],
 
-            if (isSubmitted || alreadySent || isApproved) ...[
+            if (isApproved) ...[
               const SizedBox(height: 16),
               Center(
                 child: Text(
-                  isApproved
-                      ? "Time log approved."
-                      : "Request is sent, wait for approval.",
+                  "Time log approved.",
                   style: TextStyle(
-                    color: isApproved ? Colors.blue : Colors.green,
+                    color: Colors.blue,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
