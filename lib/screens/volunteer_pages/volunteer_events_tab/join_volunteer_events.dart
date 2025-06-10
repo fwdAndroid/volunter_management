@@ -124,6 +124,7 @@ class _JoinVolunteerEventsState extends State<JoinVolunteerEvents> {
 class _AcceptedRequestCard extends StatefulWidget {
   final Map<String, dynamic> request;
   final VoidCallback? onChat;
+
   const _AcceptedRequestCard({
     Key? key,
     required this.request,
@@ -222,8 +223,6 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
   @override
   Widget build(BuildContext context) {
     final request = widget.request;
-    final String status = request['status'] ?? '';
-    final bool isApproved = status == 'approved';
     final List<dynamic> submittedLogs = request['hours'] ?? [];
 
     return Card(
@@ -237,7 +236,7 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
             Text("Date: ${request['eventDate'] ?? 'N/A'}"),
             Text("Time: ${request['eventTime'] ?? 'N/A'}"),
             Text("Organizer Name: ${request['organizationName'] ?? 'N/A'}"),
-            Text("Status: $status"),
+            Text("Status: ${request['status'] ?? ''}"),
 
             const SizedBox(height: 12),
 
@@ -249,7 +248,7 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
 
             const SizedBox(height: 16),
 
-            // Input time log UI
+            // Time log input UI
             Row(
               children: [
                 Expanded(
@@ -314,31 +313,17 @@ class _AcceptedRequestCardState extends State<_AcceptedRequestCard> {
                 ),
               ),
 
-            // Submitted logs
             if (submittedLogs.isNotEmpty) ...[
               const Divider(),
               const Text(
                 "Submitted Time Logs:",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              ...submittedLogs.map((log) {
-                return Padding(
+              ...submittedLogs.map(
+                (log) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Text(
                     "${log['startTime']} - ${log['endTime']}: ${log['hr']} hrs | ${log['description'] ?? ''} (Status: ${log['status']})",
-                  ),
-                );
-              }).toList(),
-            ],
-
-            if (isApproved) ...[
-              const SizedBox(height: 16),
-              Center(
-                child: Text(
-                  "Time log approved.",
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
